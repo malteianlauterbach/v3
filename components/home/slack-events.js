@@ -18,28 +18,37 @@ const Channel = ({ color, channel }) => (
   <Text as="strong" color={color} children={channel} />
 )
 
-const whitelistedChannels = new Set(`
-  3d-printing all-hands apple art blockchain cats
-  challenges code college-apps coronavirus deals 
-  debate design design dogs ethical-hacking film
-  functional
-  gamedev go-bears hack-night hackathons hardware 
-  homelab
-  hq india
-  languages late-night-hq-club lgbtq linux lounge
-  mason math memes minecraft music photography python
-  rust
-  ship sink-my-ship
-  sleep social studycorner support us-politics
-  welcome westborough workshops
-`.split(/\s+/ig).filter((i) => i.length > 0).map((i) => "#" + i));
+const whitelistedChannels = new Set(
+  `
+  3d-printing ai all-hands apple art blockchain books cats
+  challenges code college-apps confessions cooking coronavirus counttoamillion deals
+  debate design dogs ethical-hacking film food
+  functional gamedev go-bears hack-night hackathons hardware
+  homelab hours hq india languages late-night-hw-club lgbtq linux lounge
+  mason math memes minecraft music neuroscience photography python
+  rust ship sink-my-ship sleep social studycorner support todayilearned
+  us-politics welcome westborough wip workshops writing
+`
+    .split(/\s+/gi)
+    .filter((i) => i.length > 0)
+    .map((i) => '#' + i)
+)
 
-export default ({ sx, ...props }) => {
+const generateEvent = () => ({
+  type: sample(['message', 'typing']),
+  color: sample(colors),
+  channel: sample(Array.from(whitelistedChannels)),
+  timestamp: new Date().toISOString()
+})
+
+const SlackEvents = ({ sx, ...props }) => {
   const didUnmount = useRef(false)
-  const [events, setEvents] = useState([
-    { type: 'typing', channel: '#lounge', color: 'cyan' },
-    { type: 'message', channel: '#design', color: 'red' }
-  ])
+  const [events, setEvents] = useState([])
+  useEffect(() => {
+    setEvents([generateEvent(), generateEvent()])
+    setTimeout(() => setEvents((e) => [generateEvent(), ...e]), 5000)
+  }, [])
+
   const STATIC_OPTIONS = useMemo(
     () => ({
       shouldReconnect: () => !didUnmount.current,
@@ -47,7 +56,7 @@ export default ({ sx, ...props }) => {
     }),
     []
   )
-  const [sendEvent, lastEvent] = useWebSocket(
+  const { lastEvent } = useWebSocket(
     'wss://streambot-hackclub.herokuapp.com/',
     STATIC_OPTIONS
   )
@@ -57,7 +66,10 @@ export default ({ sx, ...props }) => {
     if (e) {
       try {
         e = JSON.parse(e)
-        if (Object.keys(types).includes(e.type) && whitelistedChannels.has(e.channel)) {
+        if (
+          Object.keys(types).includes(e.type) &&
+          whitelistedChannels.has(e.channel)
+        ) {
           e.type = types[e.type]
           e.color = sample(colors)
           if (e.type === 'reaction') e.emoji = sample(emoji)
@@ -80,7 +92,7 @@ export default ({ sx, ...props }) => {
       as="ol"
       sx={{
         height: '100%',
-        minHeight: events.length === 0 ? 'none' : '4em',
+        minHeight: '4em',
         maxHeight: ['6em', '100%'],
         overflow: 'hidden',
         listStyle: 'none',
@@ -109,7 +121,7 @@ export default ({ sx, ...props }) => {
       {...props}
     >
       {take(events, 7).map(({ timestamp, type, emoji, ...channel }) => (
-        <Slide top duration={256} key={timestamp}>
+        <Slide top duration={256} key={timestamp + JSON.stringify(channel)}>
           <>
             Someone{' '}
             {type === 'message' && (
@@ -133,3 +145,5 @@ export default ({ sx, ...props }) => {
     </Box>
   )
 }
+
+export default SlackEvents

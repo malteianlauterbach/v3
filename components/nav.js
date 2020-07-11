@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import styled from '@emotion/styled'
 import { css, keyframes } from '@emotion/core'
-import { Box, Container, Flex, Link } from 'theme-ui'
+import { Box, Container, Flex, Link, Text } from 'theme-ui'
 import theme from '../lib/theme'
 import Icon from './icon'
 import Flag from './flag'
@@ -15,7 +15,7 @@ const rgbaBgColor = (props, opacity) =>
     ${opacity}
   )`
 
-const unfixed = (props) =>
+const unfixed = props =>
   !props.unfixed &&
   css`
     position: absolute;
@@ -31,7 +31,7 @@ const unfixed = (props) =>
 //         -webkit-backdrop-filter: saturate(180%) blur(20px);
 //         backdrop-filter: saturate(180%) blur(20px);
 //       `
-const fixed = (props) =>
+const fixed = props =>
   (props.scrolled || props.toggled || props.fixed) &&
   css`
     position: fixed;
@@ -69,7 +69,7 @@ export const Content = styled(Container)`
   }
 `
 
-const hoverColor = (name) =>
+const hoverColor = name =>
   ({
     white: 'smoke',
     smoke: 'muted',
@@ -84,7 +84,7 @@ const slide = keyframes({
   to: { transform: 'translateY(0)', opacity: 1 }
 })
 
-const layout = (props) =>
+const layout = props =>
   props.isMobile
     ? css`
         display: ${props.toggled ? 'flex' : 'none'};
@@ -92,9 +92,8 @@ const layout = (props) =>
         overflow-y: auto;
         text-align: left;
         height: 100vh;
-        animation: ${slide} 0.25s ease-in;
-        @media (prefers-reduced-motion: reduce) {
-          animation: none;
+        @media (prefers-reduced-motion: no-preference) {
+          animation: ${slide} 0.25s ease-in;
         }
         a {
           color: ${theme.colors[props.dark ? 'white' : 'black']} !important;
@@ -135,16 +134,16 @@ const NavBar = styled(Box)`
     padding: ${theme.space[3]}px;
     text-decoration: none;
     @media (min-width: 56em) {
-      color: ${(props) => theme.colors[props.color] || color};
+      color: ${props => theme.colors[props.color] || color};
     }
   }
 `
 
-const Navigation = (props) => (
+const Navigation = props => (
   <NavBar role="navigation" {...props}>
     <Link href="https://hackclub.com/clubs/" children="Clubs" />
     <Link href="https://workshops.hackclub.com/" children="Workshops" />
-    <Link href="https://hackathons.hackclub.com/" children="Hackathons" />
+    <Link href="https://scrapbook.hackclub.com/" children="Scrapbook" />
     <Link href="https://hackclub.com/bank/" children="Bank" />
     <Link href="https://hackclub.com/donate/" children="Donate" />
   </NavBar>
@@ -182,13 +181,16 @@ class Header extends Component {
         this.setState({ mobile: true, toggled: false })
       })
     }
+    if (window.location.pathname === '/') {
+      this.setState({ dark: true })
+    }
   }
 
   componentWillUnmount = () => {
     this.bindScroll(false)
   }
 
-  bindScroll = (add) => {
+  bindScroll = add => {
     if (typeof window !== 'undefined' && !this.props.unfixed) {
       window[add ? 'addEventListener' : 'removeEventListener'](
         'scroll',
@@ -202,21 +204,21 @@ class Header extends Component {
     const { scrolled: oldState } = this.state
 
     if (newState !== oldState) {
-      this.setState({
-        scrolled: newState
-      })
+      this.setState({ scrolled: newState })
+    }
+    if (window.location.pathname === '/') {
+      this.setState({ dark: window.scrollY < document.body.clientHeight / 2 })
     }
   }
 
   handleToggleMenu = () => {
-    this.setState((state) => ({
-      toggled: !state.toggled
-    }))
+    this.setState(state => ({ toggled: !state.toggled }))
   }
 
   render() {
-    const { color, dark, fixed, bgColor, ...props } = this.props
+    const { color, fixed, bgColor, ...props } = this.props
     const { mobile, scrolled, toggled } = this.state
+    const dark = this.props.dark || this.state.dark
     const baseColor = dark
       ? color || 'white'
       : color === 'white' && scrolled
@@ -228,9 +230,34 @@ class Header extends Component {
       ? 'slate'
       : color
 
-    return (
+    return [
+      <Box
+        sx={{
+          pt: 5,
+          pb: 3,
+          bg: 'dark',
+          color: 'white',
+          textAlign: 'center',
+          a: { color: 'inherit', fontWeight: 'bold' }
+        }}
+        key="blm"
+      >
+        <Container variant="copy">
+          <Text as="p">
+            <Link href="https://twitter.com/hackclub/status/1266565380820160514?s=21">
+              Black Lives Matter
+            </Link>
+            {'. We’re sending '}
+            <Link href="https://twitter.com/lachlanjc/status/1269702361037058048?s=21">
+              laptops to 80&nbsp;Black & underserved teenagers
+            </Link>
+            .
+          </Text>
+        </Container>
+      </Box>,
       <Root
         {...props}
+        key="nav"
         fixed={fixed}
         scrolled={scrolled}
         toggled={toggled}
@@ -247,7 +274,7 @@ class Header extends Component {
             dark={dark}
           />
           <ToggleContainer color={toggleColor} onClick={this.handleToggleMenu}>
-            <Icon glyph={toggled ? 'view-close' : 'menu'} toggled={toggled} />
+            <Icon glyph={toggled ? 'view-close' : 'menu'} />
           </ToggleContainer>
         </Content>
         <Navigation
@@ -260,7 +287,7 @@ class Header extends Component {
         />
         {toggled && <ScrollLock />}
       </Root>
-    )
+    ]
   }
 }
 

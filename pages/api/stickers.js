@@ -1,4 +1,3 @@
-import fetch from 'isomorphic-unfetch'
 import AirtablePlus from 'airtable-plus'
 
 const peopleTable = new AirtablePlus({
@@ -37,8 +36,7 @@ export default async (req, res) => {
       'Country': data.country,
       'Person': [personRecord.id]
     })
-  }
-  else {
+  } else {
     address = (await addressesTable.read({
       filterByFormula: `{Person ID} = '${personRecord[0].fields['ID']}'`
     }))[0]

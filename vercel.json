@@ -1,10 +1,16 @@
 {
-  "public": true,
-  "trailingSlash": true,
-  "github": {
-    "silent": true
-  },
+  "github": { "silent": true },
   "env": {
-    "AIRTABLE_API_KEY": "@airtable-api-key"
-  }
+    "SLACK_BOT_TOKEN": "@slack-bot-token-production-8avf"
+  },
+  "headers": [
+    {
+      "source": "/api/(.+)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
 }

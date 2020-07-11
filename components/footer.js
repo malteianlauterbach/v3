@@ -6,22 +6,16 @@ import theme from '@hackclub/theme'
 import Icon from './icon'
 
 const Base = styled(Box)`
-  background: ${(props) =>
+  background: ${props =>
     props.dark
-      ? `${theme.colors.darker} radial-gradient(${hexa(
-          theme.colors.black,
-          0.5
-        )} 1px, transparent 1px)`
+      ? `${theme.colors.darker} radial-gradient(${theme.colors.black} 1px, transparent 1px)`
       : `${theme.colors.snow} url('https://hackclub.com/pattern.svg') repeat`};
-  ${(props) =>
+  ${props =>
     props.dark &&
-    css`
+    `
       background-size: ${theme.space[4]}px ${theme.space[4]}px;
       h2 {
         color: ${theme.colors.muted};
-      }
-      ${BottomLine} {
-        border-color: ${theme.colors.black};
       }
     `} @media print {
     display: none;
@@ -97,10 +91,6 @@ const Pages = styled(Box)`
   }
 `
 
-const BottomLine = styled(Box)`
-  border-top: 1px solid ${theme.colors.smoke};
-`
-
 const Footer = ({ dark = false, children, ...props }) => (
   <Base
     color={dark ? 'muted' : 'slate'}
@@ -111,7 +101,7 @@ const Footer = ({ dark = false, children, ...props }) => (
     {...props}
   >
     {children}
-    <Container px={3}>
+    <Container px={[3, null, 4]}>
       <Columns px={0} as="article">
         <Box>
           <Heading as="h2" variant="subheadline" mb={3}>
@@ -152,7 +142,7 @@ const Footer = ({ dark = false, children, ...props }) => (
           <Heading as="h2" variant="subheadline" mb={3}>
             Join the Club
           </Heading>
-          <Services sx={{ flexWrap: 'wrap', alignItems: 'center' }}>
+          <Services sx={{ flexWrap: 'wrap', alignItems: 'center', ml: -1 }}>
             <Service href="/community/" icon="slack-fill" target="_self" />
             <Service href="https://twitter.com/hackclub" icon="twitter" />
             <Service href="https://github.com/hackclub" icon="github" />
@@ -184,17 +174,23 @@ const Footer = ({ dark = false, children, ...props }) => (
           </Text>
         </Box>
       </Columns>
-      <Box mt={[3, 4]}>
-        <Text fontSize={3} color="muted">
-          Mail: 8605 Santa Monica Blvd #86294, West Hollywood, CA 90069
-        </Text>
-      </Box>
-      <BottomLine mt={3}>
-        <Text fontSize={2} mt={2} color="muted">
-          © {new Date().getFullYear()} Hack Club. 501(c)(3) nonprofit (EIN:
-          81-2908499)
-        </Text>
-      </BottomLine>
+      <Text as="p" fontSize={3} color="muted" mt={[3, 4]}>
+        Mail: 8605 Santa Monica Blvd #86294, West Hollywood, CA 90069
+      </Text>
+      <Text
+        as="p"
+        sx={{
+          borderTop: '1px solid',
+          borderColor: dark ? 'black' : 'smoke',
+          mt: 3,
+          pt: 2
+        }}
+        fontSize={3}
+        color="muted"
+      >
+        © {new Date().getFullYear()} Hack Club. 501(c)(3) nonprofit (EIN:
+        81-2908499)
+      </Text>
     </Container>
   </Base>
 )

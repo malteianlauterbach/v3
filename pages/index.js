@@ -10,21 +10,23 @@ import {
 } from 'theme-ui'
 import { keyframes } from '@emotion/core'
 import { Slide } from 'react-reveal'
+// import NextLink from 'next/link'
 import Head from 'next/head'
 import Meta from '@hackclub/meta'
 import Nav from '../components/nav'
 import ForceTheme from '../components/force-theme'
 import Footer from '../components/footer'
+import Announcement from '../components/home/announcement'
 import SlackEvents from '../components/home/slack-events'
 import JoinForm from '../components/home/join-form'
+// import { timeSince } from '../lib/dates'
 
-const fade = keyframes({ from: { opacity: 0 }, to: { opacity: 1 } })
 const slide = keyframes({
   from: { transform: 'translateY(-200%)' },
   to: { transform: 'translateY(0)' }
 })
 
-const CardLink = (props) => (
+const CardLink = props => (
   <Link
     sx={{
       mt: 3,
@@ -41,21 +43,30 @@ const CardLink = (props) => (
   />
 )
 
-const Event = ({ title, month, day }) => (
-  <Grid columns="auto 1fr" gap={3} sx={{ alignItems: 'center' }}>
+const Event = ({ title, month, day, past = false }) => (
+  <Grid
+    as="a"
+    href={`https://events.hackclub.com/ama-with-${title
+      .toLowerCase()
+      .replace(' ', '-')}`}
+    target="_blank"
+    columns="auto 1fr"
+    gap={3}
+    sx={{ alignItems: 'center', textDecoration: 'none', color: 'inherit' }}
+  >
     <Box
       sx={{
         borderRadius: 'default',
         lineHeight: 'caption',
         textAlign: 'center',
         border: '3px solid',
-        borderColor: 'primary',
+        borderColor: past ? 'muted' : 'primary',
         width: 60
       }}
     >
       <Box
         sx={{
-          bg: 'primary',
+          bg: past ? 'muted' : 'primary',
           color: 'white',
           letterSpacing: 'headline',
           fontWeight: 'bold',
@@ -72,7 +83,7 @@ const Event = ({ title, month, day }) => (
   </Grid>
 )
 
-const Window = ({ title, children, ...props }) => (
+const Window = ({ title, children }) => (
   <Card
     sx={{
       p: [0, 0],
@@ -86,7 +97,7 @@ const Window = ({ title, children, ...props }) => (
       sx={{
         bg: 'muted',
         color: 'smoke',
-        backgroundImage: (theme) =>
+        backgroundImage: theme =>
           `linear-gradient(${theme.colors.darkless}, ${theme.colors.darker})`,
         p: 2,
         lineHeight: 'body',
@@ -101,49 +112,37 @@ const Window = ({ title, children, ...props }) => (
 
 export default () => (
   <>
-    <Head>
-      <Meta
-        description="Hack Club is a global nonprofit network of high school makers & student-led coding clubs where young people build the agency, the network, & the technical talent to think big & do big things in the world."
-        image="https://cdn.glitch.com/a7605379-7582-4aac-8f44-45bbdfca0cfa%2Fhackclub.jpg?v=1587740807714"
-      />
-    </Head>
+    <Meta
+      as={Head}
+      description="Hack Club is a global nonprofit network of high school makers & student-led coding clubs where young people build the agency, the network, & the technical talent to think big & do big things in the world."
+      image="https://cdn.glitch.com/a7605379-7582-4aac-8f44-45bbdfca0cfa%2Fhackclub.jpg?v=1587740807714"
+    />
     <ForceTheme theme="light" />
     <Nav />
     <Box
       as="header"
       sx={{
         bg: 'dark',
-        py: [5, 6],
-        position: 'relative',
-        overflow: 'hidden',
-        '@media (prefers-reduced-motion: reduce)': {
-          background: (theme) =>
-            `${theme.colors.dark} url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTExIDc5LjE1ODMyNSwgMjAxNS8wOS8xMC0wMToxMDoyMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6ODYyRjhERDU2N0YyMTFFNjg2MzZDQjkwNkQ4MjgwMEIiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ODYyRjhERDQ2N0YyMTFFNjg2MzZDQjkwNkQ4MjgwMEIiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUgKE1hY2ludG9zaCkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3NjcyQkQ3QTY3QzUxMUU2QjJCQ0UyNDA4MTAwMjE3MSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo3NjcyQkQ3QjY3QzUxMUU2QjJCQ0UyNDA4MTAwMjE3MSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PvCS01IAAABMSURBVHjaYmR4/5+BFPBfAMFm/MBgx8RAGWCn1AAmSg34Q6kBDKMGMDCwICeMIemF/5QawEipAWwUhwEjMDvbAWlWkvVBwu8vQIABAEwBCph8U6c0AAAAAElFTkSuQmCC) repeat top left`
-        }
+        pt: [5, 6],
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
+        backgroundImage:
+          'linear-gradient(rgba(0,0,0,0.125),rgba(0,0,0,0.375)), url(https://cdn.glitch.com/a7605379-7582-4aac-8f44-45bbdfca0cfa%2F2020-05-16_screenshot.jpeg?v=1589633885855)',
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        '@media (hover: hover)': { backgroundAttachment: 'fixed' }
       }}
     >
-      <Box
-        as="video"
-        src="https://cdn.glitch.com/a7605379-7582-4aac-8f44-45bbdfca0cfa%2Fv3gif-2.mp4?v=1587697528651"
-        aria-hidden="true"
-        muted
-        autoPlay
-        playsInline
-        loop
-        sx={{
-          position: 'absolute',
-          width: '100%',
-          right: 0,
-          bottom: 0,
-          minWidth: '100%',
-          minHeight: '100%',
-          objectPosition: 'center',
-          objectFit: 'cover',
-          animation: `${fade} 6s ease-out`,
-          '@media (prefers-reduced-motion: reduce)': { display: 'none' }
-        }}
-      />
-      <Container sx={{ textAlign: 'center' }}>
+      <Container pt={[3, 4]} pb={[5, 6]}>
+        <Announcement
+          copy="The Summer of Making has begun!"
+          caption="$50k in hardware grants, daily streaks, & more"
+          href="https://summer.hackclub.com/"
+          iconLeft="event-code"
+          iconRight="door-enter"
+          color="orange"
+        />
         <Heading
           as="h1"
           variant="title"
@@ -154,54 +153,48 @@ export default () => (
             lineHeight: [0.875, 0.8],
             position: 'relative',
             zIndex: 1,
-            textShadow: (theme) => `0 0 6px ${theme.colors.red}`,
-            animation: `${slide} 0.5s ease-in-out`,
+            textShadow: 'text',
+            animation: `${slide} 1s ease-in-out`,
             '@media (prefers-reduced-motion: reduce)': { animation: 'none' }
           }}
         >
-          COVID has changed{' '}
+          Stuck home? Join{' '}
           <Text
             as="span"
             sx={{
-              WebkitTextStroke: (theme) => theme.colors.red,
+              WebkitTextStroke: theme => theme.colors.white,
               WebkitTextStrokeWidth: ['1px', '3px'],
-              WebkitTextFillColor: (theme) => theme.colors.white
+              WebkitTextFillColor: theme => theme.colors.red
             }}
           >
-            everything
+            Hack Club
           </Text>
           .
         </Heading>
       </Container>
-    </Box>
-    <Box as="section" bg="dark" py={[4, 5]}>
-      <Container
-        sx={{ textAlign: 'center', maxWidth: [null, 'copyPlus', 'copyUltra'] }}
-      >
-        <Text
-          as="p"
-          variant="subtitle"
-          sx={{
-            fontSize: [3, 28],
-            color: 'white',
-            mx: 'auto',
-            maxWidth: 'copyPlus',
-            lineHeight: 'caption',
-            a: { color: 'inherit' },
-            strong: { color: 'red' }
-          }}
-        >
-          <strong>HACK CLUB</strong> used to be a network of{' '}
-          <Link href="https://hackclub.com/clubs/">
-            high school coding clubs
-          </Link>
-          {' & '}
-          <Link href="https://hackathons.hackclub.com/">
-            in-person hackathons
-          </Link>
-          . Someday, we’ll get back to that.
-        </Text>
-      </Container>
+      <Box as="section" bg="dark" variant="cards.translucentDark" py={4}>
+        <Container sx={{ maxWidth: [null, 'copyPlus'] }}>
+          <Text
+            as="p"
+            variant="subtitle"
+            sx={{
+              my: 0,
+              fontSize: [2, 3],
+              color: 'white',
+              lineHeight: 'caption',
+              a: { color: 'inherit' }
+            }}
+          >
+            Join the global <Text as="strong">Hack Club</Text> high school
+            community chatroom, weekly&nbsp;AMAs,{' '}
+            <Link href="https://hackclub.com/clubs/">online clubs</Link>
+            {' & '}
+            <Link href="https://hackathons.hackclub.com/">
+              hackathons
+            </Link>. <Text as="strong">You’ve found your home.</Text>
+          </Text>
+        </Container>
+      </Box>
     </Box>
     <Box
       as="section"
@@ -230,8 +223,8 @@ export default () => (
           variant="title"
           sx={{ fontSize: [5, 6], mb: 4, strong: { color: 'red' } }}
         >
-          We’re trying to make <strong>Hack Club</strong> the best place on the
-          internet to be a teenager into technology.
+          We’re making <strong>Hack Club</strong> the best place on the internet
+          to be a teenager into technology.
         </Heading>
         {/* <Button as="a" href="#join" variant="cta">
           Join our Slack
@@ -256,10 +249,10 @@ export default () => (
             Watch our Elon Musk AMA
           </CardLink>
           <Grid columns={[2, 'initial']} gap={3} mt={4}>
-            <Event month="April" day={24} title="Elon Musk" />
-            <Event month="April" day={30} title="Jack Conte" />
-            <Event month="May" day={7} title="Simone Giertz" />
-            <Event month="May" day={14} title="Guillermo Rauch" />
+            <Event month="May" day={14} title="Guillermo Rauch" past />
+            <Event month="June" day={4} title="Audrey Tang" past />
+            <Event month="June" day={11} title="Patrick Collison" past />
+            <Event month="June" day={25} title="ladyada" />
           </Grid>
         </Box>
         <Slide up>
@@ -303,11 +296,11 @@ export default () => (
         </Slide>
         <Box sx={{ gridRow: ['1', 'initial'] }}>
           <Heading as="h3" variant="headline" my={0}>
-            Student-run workshops every week on coding, cooking, drawing,
-            everything.
+            $50k of hardware grants, daily streaks & project updates, & weekly
+            Zoom events all summer.
           </Heading>
-          <CardLink href="https://youtu.be/Xy_owni1ZVk">
-            Watch a recent live-code
+          <CardLink href="https://summer.hackclub.com/">
+            Explore Summer of Making
           </CardLink>
         </Box>
         <div>
@@ -321,7 +314,7 @@ export default () => (
                 ':focus,:hover': {
                   WebkitTextStroke: 'currentColor',
                   WebkitTextStrokeWidth: '1px',
-                  WebkitTextFillColor: (theme) => theme.colors.white,
+                  WebkitTextFillColor: theme => theme.colors.white,
                   textShadow: '0 0 4px currentColor'
                 }
               }}
@@ -366,7 +359,7 @@ export default () => (
             right: 0,
             display: 'block',
             height: 256,
-            backgroundImage: (theme) =>
+            backgroundImage: theme =>
               `linear-gradient(rgba(255,255,255,0), ${theme.colors.white})`
           },
           py: [4, 5]
@@ -391,7 +384,7 @@ export default () => (
           <Text as="p" sx={{ maxWidth: 'copy', fontSize: [2, 3], mt: 3 }}>
             Have a coding question? Looking for project feedback? You’ll find
             some fabulous people to talk to in our global Slack (Discord-style
-            online groupchat) with 8,000+ members, active at all hours.
+            online groupchat) with 9,000+ members, active at all hours.
           </Text>
         </Container>
       </Box>
@@ -449,16 +442,15 @@ export default () => (
             sx={{
               gridColumn: ['span 2', 'span 6'],
               bg: 'blue',
-              backgroundImage: (theme) => `radial-gradient(
-    ellipse farthest-corner at top left, ${theme.colors.cyan}, ${theme.colors.blue})`
+              backgroundImage: theme => `radial-gradient(
+    ellipse farthest-corner at top left, ${theme.colors.cyan}, ${theme.colors.blue})`,
+              p: { color: 'smoke', fontSize: 2, mt: 1, lineHeight: 'caption' }
             }}
           >
             <Heading as="h3" variant="headline">
               #ship
             </Heading>
-            <Text as="p" sx={{ color: 'smoke', fontSize: 2, mt: 1 }}>
-              Share your latest projects & get feedback
-            </Text>
+            <Text as="p">Share your latest projects & get feedback</Text>
           </Card>
           <Card
             as="aside"
@@ -468,15 +460,14 @@ export default () => (
               backgroundImage:
                 'url(https://cdn.glitch.com/a7605379-7582-4aac-8f44-45bbdfca0cfa%2Fnight.jpg?v=1587692925213)',
               backgroundPosition: 'top center',
-              backgroundSize: 'cover'
+              backgroundSize: 'cover',
+              p: { color: 'smoke', fontSize: 2, mt: 1, lineHeight: 'caption' }
             }}
           >
             <Heading as="h3" variant="headline">
               #hack-night
             </Heading>
-            <Text as="p" sx={{ color: 'smoke', fontSize: 2, mt: 1 }}>
-              Biweekly mini-hackathon & video call hangout
-            </Text>
+            <Text as="p">Biweekly mini-hackathon & video call hangout</Text>
           </Card>
           <Card bg="cyan">
             <h3>#lounge</h3>
@@ -528,36 +519,22 @@ export default () => (
       </Container>
     </Box>
     <Box
-      as="footer"
+      as="section"
+      id="slack"
       sx={{
         bg: 'cyan',
-        backgroundImage: (theme) => theme.util.gradient('yellow', 'orange'),
+        backgroundImage: theme => theme.util.gradient('yellow', 'orange'),
         color: 'white',
-        py: [5, 6]
+        py: 5
       }}
     >
       <Container
         sx={{ textAlign: 'center', maxWidth: [null, 'copyPlus', 'copyUltra'] }}
       >
-        <Heading as="h2" variant="title" sx={{ fontSize: [5, 6, 7], mb: 3 }}>
+        <Heading as="h2" variant="title" sx={{ fontSize: [5, 6, 7], mb: 4 }}>
           Join our Slack
         </Heading>
-        <Text
-          as="p"
-          variant="subtitle"
-          sx={{
-            fontSize: 3,
-            opacity: 0.875,
-            maxWidth: 'copy',
-            mx: 'auto',
-            mb: 4
-          }}
-        >
-          Due to high demand from the Elon Musk AMA, we’re temporarily pausing
-          Slack signups. But we still want to meet you! Add yourself to the
-          signup queue—we’ll be adding everyone over the next week.
-        </Text>
-        <JoinForm />
+        <JoinForm sx={{ bg: 'rgba(255,255,255,0.75)' }} />
       </Container>
     </Box>
     <Footer />

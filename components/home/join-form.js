@@ -2,24 +2,11 @@ import { Card, Label, Input, Checkbox, Textarea } from 'theme-ui'
 import useForm from '../../lib/use-form'
 import Submit from '../submit'
 
-const JoinForm = () => {
-  const { status, formProps, useField } = useForm('/api/join')
+const JoinForm = ({ sx = {} }) => {
+  const { status, formProps, useField } = useForm('https://v3.hackclub.com/api/som-join/')
 
   return (
-    <Card
-      sx={{
-        bg: 'rgba(255,255,255,0.875)',
-        maxWidth: 'narrow',
-        mx: 'auto',
-        label: {
-          display: 'flex',
-          flexDirection: 'column',
-          textAlign: 'left',
-          fontSize: 2,
-          mb: 3
-        }
-      }}
-    >
+    <Card sx={{ maxWidth: 'narrow', mx: 'auto', ...sx }}>
       <form {...formProps}>
         <Label>
           Full name
@@ -50,7 +37,7 @@ const JoinForm = () => {
           labels={{
             default: 'Request invitation',
             error: 'Something went wrong',
-            success: 'Submitted!'
+            success: 'Check your email!'
           }}
         />
       </form>
